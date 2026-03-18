@@ -1,0 +1,8 @@
+{
+  "name": "omop-cdm",
+  "description": "OMOP Common Data Model v5.4 knowledge skill for vocabulary navigation, CDM conventions, SQL patterns, ETL design, and data quality",
+  "version": "1.0.0",
+  "author": { "name": "Vijay Patil" },
+  "license": "MIT",
+  "keywords": ["omop", "cdm", "ohdsi", "vocabulary", "fhir", "clinical-data", "healthcare"]
+}
