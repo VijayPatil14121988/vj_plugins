@@ -1,0 +1,20 @@
+{
+  "$schema": "https://anthropic.com/claude-code/marketplace.schema.json",
+  "name": "vijay-plugins",
+  "description": "Custom Claude Code plugins by Vijay Patil",
+  "owner": {
+    "name": "Vijay Patil"
+  },
+  "plugins": [
+    {
+      "name": "omop-cdm",
+      "description": "OMOP Common Data Model v5.4 knowledge skill for vocabulary navigation, CDM conventions, SQL patterns, ETL design, and data quality",
+      "version": "1.0.0",
+      "author": {
+        "name": "Vijay Patil"
+      },
+      "source": "./plugins/omop-cdm",
+      "category": "development"
+    }
+  ]
+}
