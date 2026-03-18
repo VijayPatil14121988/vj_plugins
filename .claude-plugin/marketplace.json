@@ -1,7 +1,5 @@
 {
-  "$schema": "https://anthropic.com/claude-code/marketplace.schema.json",
   "name": "vijay-plugins",
-  "description": "Custom Claude Code plugins by Vijay Patil",
   "owner": {
     "name": "Vijay Patil"
   },
