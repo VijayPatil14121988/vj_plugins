@@ -18,6 +18,7 @@ NEVER auto-start subagents. Always present the dispatch plan and wait for explic
 ```dot
 digraph implementation {
     "Load task list" [shape=doublecircle];
+    "Branch setup" [shape=box];
     "Analyze dependencies" [shape=box];
     "Build dispatch plan" [shape=box];
     "Present plan to user" [shape=box];
@@ -29,7 +30,8 @@ digraph implementation {
     "Fix issues" [shape=box];
     "Escalate to user" [shape=box];
 
-    "Load task list" -> "Analyze dependencies";
+    "Load task list" -> "Branch setup";
+    "Branch setup" -> "Analyze dependencies";
     "Analyze dependencies" -> "Build dispatch plan";
     "Build dispatch plan" -> "Present plan to user";
     "Present plan to user" -> "User approves?";
@@ -45,7 +47,28 @@ digraph implementation {
 }
 ```
 
-## Dispatch Plan Presentation
+## Step 1: Branch Setup (BEFORE any code work)
+
+<HARD-GATE>
+Branch setup MUST happen before any subagent is dispatched or any code is written. This is the first action after loading the task list.
+</HARD-GATE>
+
+1. **Check current branch**: `git branch --show-current`
+2. **If on `develop`, `master`, or `main`**:
+   - Pull latest: `git pull origin <branch>`
+   - Create feature branch: `git checkout -b feature/<jira-ticket>-<short-description>`
+3. **If already on a feature branch**: Verify it's up to date, continue working on it
+4. **Confirm to user**: "Created branch `feature/<name>` from latest `develop`. Ready to proceed."
+
+```
+Branch setup:
+  Current branch: develop
+  Action: Pulled latest → Created feature/PROJ-123-add-patient-api
+
+Ready to present dispatch plan.
+```
+
+## Step 2: Dispatch Plan Presentation
 
 Before any work begins, present:
 
