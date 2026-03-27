@@ -13,6 +13,16 @@
       },
       "source": "./plugins/omop-cdm",
       "category": "development"
+    },
+    {
+      "name": "siddhi",
+      "description": "Disciplined software development workflow for Claude Code: adaptive pipeline, domain-aware reviews, integration-first testing",
+      "version": "1.0.0",
+      "author": {
+        "name": "Vijay Patil"
+      },
+      "source": "./plugins/siddhi",
+      "category": "development"
     }
   ]
 }
