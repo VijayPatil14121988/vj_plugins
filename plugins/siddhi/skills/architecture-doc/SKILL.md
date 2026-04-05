@@ -46,6 +46,20 @@ digraph arch_doc {
 }
 ```
 
+## Agent Dispatch
+
+For **medium and large** tasks, dispatch the `architect` specialist agent to produce the architecture document:
+
+1. Provide the agent with:
+   - Requirements summary from product-owner stage
+   - Path to CLAUDE.md for project conventions
+   - List of detected domains for domain-specific sections
+2. Agent produces the architecture doc following the template below
+3. Present the doc to user section-by-section for approval
+4. Write approved doc to file
+
+For **small** tasks that still warrant an architecture doc (user-requested), create the doc in the main context without agent dispatch.
+
 ## Template
 
 Every architecture doc follows this structure. Scale each section to its complexity — a few sentences if straightforward, detailed if nuanced.

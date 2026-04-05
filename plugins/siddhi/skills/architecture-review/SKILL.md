@@ -42,6 +42,19 @@ digraph arch_review {
 }
 ```
 
+## Agent Dispatch
+
+Dispatch the `architecture-reviewer` agent to perform the review:
+
+1. Provide the agent with:
+   - Path to the architecture doc
+   - Path to CLAUDE.md for project conventions
+   - Requirements summary for spec coverage verification
+2. Agent runs the self-review checklist and reports findings
+3. Present findings to user alongside the approval gate
+
+The user gate remains mandatory — the agent's review supplements but does not replace user approval. Never proceed to logical-tasks until the user explicitly approves.
+
 ## Self-Review Checklist
 
 Run these checks against the architecture doc:

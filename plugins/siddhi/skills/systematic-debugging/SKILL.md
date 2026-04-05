@@ -73,6 +73,21 @@ Based on the error context, apply domain-specific investigation:
 3. **Run all tests** — the new test passes, no regressions
 4. **Commit** with a message explaining the root cause and fix
 
+## Agent Dispatch
+
+When debugging is triggered by a checkpoint failure or a complex investigation:
+
+1. Dispatch the `debugger` specialist agent with:
+   - Error context: stack traces, logs, failing test output
+   - Path to CLAUDE.md and architecture doc (if exists)
+   - Recent git changes relevant to the failure
+2. Agent follows the four-phase investigation process
+3. Agent reports: `ROOT_CAUSE_FOUND`, `ROOT_CAUSE_FOUND_WITH_FIX`, `NEEDS_MORE_INFO`, or `BLOCKED`
+4. If `NEEDS_MORE_INFO`: gather the requested information and re-dispatch or investigate manually
+5. If `ROOT_CAUSE_FOUND_WITH_FIX`: run checkpoint verification on the fix
+
+For simple, obvious failures (typo, missing import), fix directly without agent dispatch.
+
 ## Red Flags
 
 These mean you're doing it wrong:

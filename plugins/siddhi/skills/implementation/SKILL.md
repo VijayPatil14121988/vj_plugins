@@ -70,56 +70,76 @@ Ready to present dispatch plan.
 
 ## Step 2: Dispatch Plan Presentation
 
-Before any work begins, present:
+Before any work begins, present the plan with agent assignments:
 
 ```
 Ready to execute:
-  Batch 1 (parallel): Task 1 (DB Migration), Task 4 (Kafka Consumer), Task 5 (S3 Service)
-  Batch 2 (sequential): Task 2 (Entity Classes) → Task 3 (Repository Layer)
-  Batch 3 (after all): Task 6 (Integration Tests)
+  Batch 1 (parallel):
+    Task 1 (DB Migration)    → sql-developer
+    Task 4 (Kafka Consumer)  → kafka-engineer
+    Task 5 (S3 Service)      → aws-engineer
+  Batch 2 (sequential):
+    Task 2 (Entity Classes)  → spring-boot-engineer
+    Task 3 (Repository Layer) → spring-boot-engineer
+  Batch 3 (after all):
+    Task 6 (Integration Tests) → test-automator
 
-Each subagent will:
-- Read and follow CLAUDE.md conventions
-- Follow the architecture doc
-- Write tests per the testing matrix
+Each agent will:
+- Read CLAUDE.md, architecture doc, and their task spec
+- Follow the Siddhi protocol (report DONE/BLOCKED/ARCHITECTURE_ISSUE)
 - Commit after completing their task
 
-Proceed? [y/n]
+Override any agent assignment? Proceed? [y/n]
 ```
 
-## Subagent Prompt Template
+## Agent Selection
 
-Each subagent receives this context:
+After analyzing dependencies, select the right agent for each task:
+
+### Selection Rules
+
+| File Pattern / Signal | Agent |
+|---|---|
+| `*.java` + Spring annotations | `spring-boot-engineer` |
+| `*.py` + FastAPI/Pydantic | `python-fastapi-developer` |
+| `*.go` / `go.mod` | `golang-developer` |
+| `*.js/*.ts` + Express/Nest/Node | `nodejs-developer` |
+| `*.cs` / `*.csproj` | `dotnet-developer` |
+| `*.tsx/*.jsx` + React | `react-developer` |
+| `*.ts` (non-React) | `typescript-developer` |
+| `next.config.*` / app router | `nextjs-developer` |
+| Kafka references | `kafka-engineer` |
+| SQL migrations / schema | `sql-developer` |
+| ETL / Spark / Airflow | `data-pipeline-engineer` |
+| ML model / training | `ml-engineer` |
+| `*.tf` / `*.tfvars` | `terraform-engineer` |
+| `Dockerfile` / `compose` | `docker-engineer` |
+| K8s YAML / Helm | `kubernetes-engineer` |
+| AWS SDK / SAM / CDK | `aws-engineer` |
+| React Native structure | `react-native-developer` |
+| `*.dart` / `pubspec.yaml` | `flutter-developer` |
+| OMOP / PHI / clinical | `healthcare-engineer` |
+| No strong signal | Language-specific fallback or prompt user to choose |
+
+### Selection Process
+
+1. Read the task spec: file paths, contract, constraints, domain tags
+2. Match file patterns and domain signals against the table above
+3. If multiple agents match, prefer the more specific one (e.g., `nextjs-developer` over `react-developer` for Next.js projects)
+4. If no strong signal, use the dominant language's agent as fallback
+5. Include the agent assignment in the dispatch plan for user review
+
+## Subagent Dispatch
+
+Since agents already embed the Siddhi protocol, the dispatch context is minimal:
 
 ```
-You are implementing a specific task as part of a larger feature.
-
-BEFORE ANY WORK:
-1. Read CLAUDE.md in the project root for conventions and patterns
-2. Read the architecture doc at [path] — specifically the section relevant to your task
-3. Follow existing code patterns in the codebase
-
-YOUR TASK:
-[Task spec from logical-tasks — contract, acceptance criteria, constraints, file paths]
-
-TESTING APPROACH:
-[Testing strategy for this task type from the testing matrix]
-- Testcontainers over mocks for database and messaging
-- Localstack for AWS services
-- No mocking internal services — mock only external boundaries
-
-GIT RULES:
-- Create a logical commit when your task is complete
-- Commit message focused on the "why", not the "what"
-- No Co-Authored-By lines
-- Do NOT push
-
-GUARDRAILS:
-- Do NOT modify files outside your task scope
-- Do NOT make architectural decisions — follow the architecture doc
-- If the architecture doc seems wrong or incomplete, STOP and report back — do not improvise
-- If you are blocked by something outside your control, STOP and report back
+ARCHITECTURE DOC: [path to the architecture doc]
+YOUR TASK: [full task spec from logical-tasks — contract, acceptance criteria, constraints, file paths]
+TESTING APPROACH: [testing strategy for this task type from the testing matrix]
 ```
+
+The agent already knows to read CLAUDE.md, follow git rules, and report status. Do not duplicate those instructions.
 
 ## Dependency Analysis Rules
 

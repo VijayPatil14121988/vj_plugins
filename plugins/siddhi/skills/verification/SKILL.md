@@ -48,6 +48,21 @@ git diff --stat
 - Are there unintended changes?
 - No secrets or credentials in the diff?
 
+## Agent Dispatch
+
+For comprehensive verification of completed work:
+
+1. Dispatch the `test-automator` specialist agent with:
+   - Task spec or acceptance criteria to verify
+   - Path to CLAUDE.md for testing conventions
+   - Path to architecture doc for testing approach per component
+2. Agent runs tests, checks coverage, and verifies each acceptance criterion
+3. Agent reports: `VERIFIED` (with evidence), `FAILED` (with specifics), or `BLOCKED`
+4. If `VERIFIED`: proceed with completion claim using the agent's evidence
+5. If `FAILED`: address failures before claiming completion
+
+The verification gate remains mandatory — agent evidence satisfies the "fresh verification" requirement. Agent-reported "VERIFIED" with test output counts as evidence.
+
 ## Common Failures
 
 | Claim | Required Evidence | Insufficient |

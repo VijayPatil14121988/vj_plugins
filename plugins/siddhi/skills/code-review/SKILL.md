@@ -97,6 +97,50 @@ Everything in Tier 2, plus domain-specific checks based on detected domains:
 <1-2 sentence overall assessment>
 ```
 
+## Reviewer Dispatch
+
+The code-review skill dispatches reviewer agents based on tier:
+
+### Tier 1 (Quick)
+Dispatch: `code-reviewer` agent only
+
+### Tier 2 (Standard)
+Dispatch in parallel:
+- `code-reviewer` agent
+- `architecture-reviewer` agent
+
+### Tier 3 (Domain-Aware)
+Dispatch in parallel:
+- `code-reviewer` agent
+- `architecture-reviewer` agent
+- `security-auditor` agent (if changes touch auth, secrets, IAM, or PHI)
+- `performance-reviewer` agent (if changes involve DB queries, caching, or high-throughput paths)
+
+### Result Aggregation
+
+Collect findings from all dispatched reviewers and present a unified report:
+
+```
+## Combined Review: <Feature Name>
+**Tier:** N
+**Verdict:** Approved | Changes Requested
+
+### Code Review Findings
+[findings from code-reviewer]
+
+### Architecture Findings (Tier 2+)
+[findings from architecture-reviewer]
+
+### Security Findings (Tier 3, if applicable)
+[findings from security-auditor]
+
+### Performance Findings (Tier 3, if applicable)
+[findings from performance-reviewer]
+
+### Overall Verdict
+<Approved if all reviewers approve, Changes Requested if any reviewer flags CRITICAL>
+```
+
 ## After Review
 
 ### If Approved
