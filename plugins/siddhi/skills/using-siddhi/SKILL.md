@@ -33,7 +33,28 @@ Use the `Skill` tool. When you invoke a skill, its content is loaded and present
 
 ```
 Product Owner → Architecture Doc → Architecture Review → Logical Tasks → Implementation Phase → Code Review
+                     ↓                   ↓                                      ↓                    ↓
+                 architect           arch-reviewer                       agent-selector         multi-reviewer
+                  agent                agent                          picks specialized          dispatch
+                                                                    implementer agents
 ```
+
+### Agent Dispatch Points
+
+| Pipeline Stage | Agent(s) Dispatched |
+|---|---|
+| Architecture Doc | `architect` specialist (medium/large tasks) |
+| Architecture Review | `architecture-reviewer` (automated review before user gate) |
+| Implementation | Agent selector picks from `implementers/*` based on task file patterns |
+| Code Review | `code-reviewer` + tier-based additional reviewers |
+| Debugging (support) | `debugger` specialist |
+| Verification (support) | `test-automator` specialist |
+
+### Agent Roles
+
+- **Implementers** (`agents/implementers/`): Build things — backend, frontend, data, infra, mobile, domain specialists
+- **Reviewers** (`agents/reviewers/`): Review things — code, security, performance, architecture
+- **Specialists** (`agents/specialists/`): On-demand expertise — architect, debugger, test-automator, api-designer, database-architect
 
 ### Adaptive Scaling
 
@@ -42,9 +63,9 @@ Not every task needs the full pipeline:
 | Task Size | Pipeline |
 |-----------|----------|
 | **Trivial** (config, env var, typo) | Option Zero resolves it → fix → commit |
-| **Small** (bug fix, single-file) | Product Owner → implement → quick review → commit |
-| **Medium** (new endpoint, method) | Product Owner → Architecture Doc → implement → standard review → commit |
-| **Large** (new service, multi-component) | Full pipeline with formal review gates |
+| **Small** (bug fix, single-file) | Product Owner → implement (with agent) → quick review → commit |
+| **Medium** (new endpoint, method) | Product Owner → Architecture Doc (architect agent) → implement (with agents) → standard review → commit |
+| **Large** (new service, multi-component) | Full pipeline with formal review gates and multi-reviewer dispatch |
 
 ## Using Skills
 
@@ -74,8 +95,9 @@ digraph skill_flow {
 When multiple skills could apply:
 
 1. **Process skills first** (product-owner, debugging) — determine HOW to approach
-2. **Pipeline skills second** (architecture-doc, logical-tasks) — guide execution
-3. **Domain skills** (healthcare, java-spring, data-pipelines, cloud-aws) — invoked within pipeline stages
+2. **Pipeline skills second** (architecture-doc, logical-tasks, implementation) — guide execution
+3. **Domain skills** (healthcare, java-spring, data-pipelines, cloud-aws) — invoked within pipeline stages for questions and checklists
+4. **Agent dispatch** — skills dispatch appropriate agents; agents carry the deep domain expertise
 
 ### Domain Auto-Detection
 

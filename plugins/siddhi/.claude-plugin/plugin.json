@@ -1,20 +1,28 @@
 {
   "name": "siddhi",
-  "description": "Disciplined software development workflow for Claude Code: adaptive pipeline, domain-aware reviews, integration-first testing",
-  "version": "1.0.0",
+  "description": "Disciplined software development workflow with adaptive pipeline, specialized agent catalog, and domain-aware reviews",
+  "version": "2.0.0",
   "author": {
     "name": "Vijay Patil"
   },
   "license": "MIT",
   "keywords": [
     "skills",
+    "agents",
     "architecture",
+    "workflows",
+    "code-review",
     "healthcare",
     "java",
     "spring-boot",
     "data-pipelines",
     "aws",
-    "workflows",
-    "code-review"
+    "react",
+    "typescript",
+    "terraform",
+    "kubernetes",
+    "docker",
+    "python",
+    "golang"
   ]
 }
