@@ -37,7 +37,9 @@ digraph implementation {
     "Present plan to user" -> "User approves?";
     "User approves?" -> "Present plan to user" [label="no, revise"];
     "User approves?" -> "Execute batch" [label="yes"];
-    "Execute batch" -> "Checkpoint";
+    "Execute batch" -> "Capture context" [label="agent reports"];
+    "Capture context" [shape=box];
+    "Capture context" -> "Checkpoint";
     "Checkpoint" -> "All batches done?" [label="pass"];
     "Checkpoint" -> "Fix issues" [label="fail"];
     "Fix issues" -> "Checkpoint" [label="retry"];
@@ -137,9 +139,70 @@ Since agents already embed the Siddhi protocol, the dispatch context is minimal:
 ARCHITECTURE DOC: [path to the architecture doc]
 YOUR TASK: [full task spec from logical-tasks — contract, acceptance criteria, constraints, file paths]
 TESTING APPROACH: [testing strategy for this task type from the testing matrix]
+PRIOR TASK CONTEXT: [summaries from completed dependency tasks — see Context Forwarding below]
 ```
 
 The agent already knows to read CLAUDE.md, follow git rules, and report status. Do not duplicate those instructions.
+
+## Context Forwarding
+
+Agents cannot talk to each other. The coordinator bridges this gap by forwarding structured context from completed tasks to dependent tasks.
+
+### How It Works
+
+After each agent reports DONE or DONE_WITH_CONCERNS, the coordinator captures a **task output summary** — a concise description of what was built, what files were created/modified, and any key decisions or artifacts (table schemas, API contracts, interface signatures).
+
+When dispatching a subsequent task that depends on the completed one, the coordinator includes the summary in the `PRIOR TASK CONTEXT` field.
+
+### What to Capture
+
+From each completed agent's report and committed code, extract:
+
+| What | Example |
+|---|---|
+| **Files created/modified** | `Created: src/main/resources/db/migration/V003__add_visit_occurrence.sql` |
+| **Schemas and contracts** | `Table visit_occurrence: visit_id (BIGINT PK), person_id (BIGINT FK→person), visit_date (TIMESTAMPTZ), visit_concept_id (INT FK→concept)` |
+| **Interface signatures** | `VisitRepository extends JpaRepository<VisitOccurrence, Long>` with `findByPersonId(Long)` |
+| **API endpoints** | `POST /api/v1/visits → 201, GET /api/v1/patients/{id}/visits → 200 (paginated)` |
+| **Config or environment** | `New config key: app.visits.max-page-size=100 in application.yml` |
+| **Concerns flagged** | `DONE_WITH_CONCERNS: visit_date column allows NULL — architecture doc unclear on this` |
+
+### What NOT to Capture
+
+- Full file contents (the agent can read the committed files)
+- Implementation details that don't affect downstream tasks
+- Test code (unless the next task needs to extend those tests)
+
+### Dispatch Example with Context
+
+```
+ARCHITECTURE DOC: docs/arch/2026-04-05-patient-visit-api.md
+
+PRIOR TASK CONTEXT:
+  Task 1 (sql-developer, DONE):
+    Created V003__add_visit_occurrence.sql
+    Schema: visit_occurrence(visit_id BIGINT PK, person_id BIGINT FK→person,
+            visit_date TIMESTAMPTZ NOT NULL, visit_concept_id INT FK→concept,
+            visit_type_concept_id INT, created_at TIMESTAMPTZ, updated_at TIMESTAMPTZ)
+    Index: idx_visit_occurrence_person_id ON visit_occurrence(person_id)
+
+YOUR TASK:
+  Task 2: Create JPA entity classes matching the visit_occurrence schema.
+  [full task spec...]
+
+TESTING APPROACH: Integration tests with Testcontainers PostgreSQL
+```
+
+### Parallel Batch Context
+
+For tasks in a parallel batch (no dependencies on each other), `PRIOR TASK CONTEXT` contains summaries from all previously completed batches — not from other tasks in the same batch.
+
+```
+Batch 1 (parallel): Task 1, Task 4, Task 5 → all complete with summaries captured
+Batch 2 (sequential): Task 2 gets context from Task 1 (its dependency)
+                       Task 3 gets context from Task 1 AND Task 2
+Batch 3: Task 6 gets context from all prior tasks
+```
 
 ## Dependency Analysis Rules
 
@@ -165,10 +228,12 @@ After each task or parallel batch completes:
 
 | Status | Action |
 |--------|--------|
-| **DONE** | Run checkpoint, proceed if pass |
-| **DONE_WITH_CONCERNS** | Review concerns, run checkpoint, flag concerns to user if significant |
+| **DONE** | Capture output summary for context forwarding, run checkpoint, proceed if pass |
+| **DONE_WITH_CONCERNS** | Capture output summary (include concerns), review concerns, run checkpoint, flag concerns to user if significant |
 | **BLOCKED** | Stop pipeline, escalate to user with blocker details |
 | **ARCHITECTURE_ISSUE** | Stop pipeline, present the issue, ask user if architecture doc needs revision |
+
+After DONE or DONE_WITH_CONCERNS: always capture the task output summary (schemas, contracts, files, key decisions) before moving to the checkpoint. This summary feeds into context forwarding for dependent tasks.
 
 ## Completion
 
